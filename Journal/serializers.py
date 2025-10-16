@@ -16,7 +16,7 @@ class GoalsSerializer(serializers.ModelSerializer):
 
 
 class JournalEntriesSerializer(serializers.ModelSerializer):
-    goal=GoalsSerializer(many=True, read_only=True)
+    goal=GoalsSerializer(read_only=True)
     user=serializers.ReadOnlyField(source='user.username')
 
     class Meta:
@@ -24,7 +24,7 @@ class JournalEntriesSerializer(serializers.ModelSerializer):
         fields='__all__'
 
 class ProgressTrackersSerializer(serializers.ModelSerializer):
-    goal=GoalsSerializer(many=True, read_only=True)
+    goal=GoalsSerializer(read_only=True) #many=True removed because it's a ForeignKey relationship and is only usedin many-to-many or one-to-many relationships
     user=serializers.ReadOnlyField(source='user.username')
 
     class Meta:
