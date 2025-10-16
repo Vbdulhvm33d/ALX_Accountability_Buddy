@@ -31,7 +31,7 @@ class JournalEntries(models.Model):
 
 
 class ProgressTrackers(models.Model):
-    user=models.ForeignKey(User, on_delete=models.CASCADE, related_name='progress')
+    user=models.ForeignKey(User, on_delete=models.CASCADE, related_name='userprogress')
     goal=models.ForeignKey(Goals, on_delete=models.CASCADE, related_name='progress')
     completion_percentage=models.FloatField(default=0.0)
     streak_count=models.IntegerField(default=0)
