@@ -2,15 +2,20 @@ from django.shortcuts import render
 from rest_framework import viewsets, permissions, generics
 from .serializers import GoalsSerializer, JournalEntriesSerializer, ProgressTrackersSerializer
 from .models import Goals, JournalEntries, ProgressTrackers
+from .permissions import IsAuthenticatedorReadOnly
 from django.contrib.auth.models import User
 
 class BaseUserViewset(viewsets.ModelViewSet):
-    permission_classes=[permissions.IsAuthenticated]
+    permission_classes=[permissions.IsAuthenticatedOrReadOnly]
     def perform_create(self, serializer):#this line of function ensures that the user field is automatically set to the currently authenticated user when a new goal is created.
         return serializer.save(user=self.request.user)
-    
-    def get_queryset(self):#this line of function filters the queryset to only include goals that belong to the currently authenticated user.
-        return self.queryset.filter(user=self.request.user)
+
+   #this line of function filters the queryset to only include goals that belong to the currently authenticated user. 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated:
+            return self.queryset.filter(user=user)
+        return self.queryset.none()
 
 class GoalsViewSet(BaseUserViewset):
     queryset=Goals.objects.select_related('user').all()
@@ -23,7 +28,7 @@ class GoalsViewSet(BaseUserViewset):
     #def get_queryset(self):
         #return self.queryset.filter(user=self.request.user)
     
-class JournalEntriesViewSet(viewsets.ModelViewSet):
+class JournalEntriesViewSet(BaseUserViewset):
     queryset=JournalEntries.objects.select_related('user','goal').all()
     serializer_class=JournalEntriesSerializer
     #permission_classes=[permissions.IsAuthenticated]
@@ -34,7 +39,7 @@ class JournalEntriesViewSet(viewsets.ModelViewSet):
     #def get_queryset(self):
         #return self.queryset.filter(user=self.request.user)
     
-class ProgressTrackersViewSet(viewsets.ModelViewSet):
+class ProgressTrackersViewSet(BaseUserViewset):
     queryset=ProgressTrackers.objects.select_related('user','goal').all()#I included select_related to optimize queries by reducing the number of database hits when accessing related user and goal objects.
     serializer_class=ProgressTrackersSerializer
     #permission_classes=[permissions.IsAuthenticated]
