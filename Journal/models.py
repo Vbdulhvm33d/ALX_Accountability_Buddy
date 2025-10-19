@@ -5,9 +5,9 @@ from django.contrib.auth.models import User
 class Goals(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE, related_name='goals')
     title=models.CharField(max_length=200)
-    category=models.CharField(max_length=100)
+    category=models.CharField(max_length=100, choices=[('Health', 'Health'), ('Career', 'Career'), ('Personal Development', 'Personal Development'), ('Finance', 'Finance'), ('Relationships', 'Relationships'), ('Other', 'Other')])
     description=models.TextField()
-    status=models.CharField(max_length=50, default='Not Started')
+    status=models.CharField(max_length=50, default='Not Started', choices=[('Not Started', 'Not Started'), ('In Progress', 'In Progress'), ('Completed', 'Completed')])
     start_date=models.DateField()
     end_date=models.DateField()
     created_at=models.DateTimeField(auto_now_add=True)
@@ -22,7 +22,7 @@ class JournalEntries(models.Model):
     title=models.CharField(max_length=200)
     date=models.DateField(auto_now_add=True)
     reflection_text=models.TextField()
-    mood_rating=models.IntegerField()
+    mood_rating=models.IntegerField(max_length=1, choices=[(1, 'Very Poor'), (2, 'Poor'), (3, 'Average'), (4, 'Good'), (5, 'Excellent')])
     created_at=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
