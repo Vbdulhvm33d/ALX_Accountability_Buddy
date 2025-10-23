@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 #and we can use the serializers to define custom fields and methods for our models
 
 class GoalsSerializer(serializers.ModelSerializer):
-    user=serializers.ReadOnlyField(source='user.username')
+    owner=serializers.ReadOnlyField(source='owner.username')
 
     class Meta:
         model=Goals
@@ -17,7 +17,7 @@ class GoalsSerializer(serializers.ModelSerializer):
 
 class JournalEntriesSerializer(serializers.ModelSerializer):
     goal=GoalsSerializer(read_only=True)
-    user=serializers.ReadOnlyField(source='user.username')
+    owner=serializers.ReadOnlyField(source='owner.username')
 
     class Meta:
         model=JournalEntries
@@ -25,7 +25,7 @@ class JournalEntriesSerializer(serializers.ModelSerializer):
 
 class ProgressTrackersSerializer(serializers.ModelSerializer):
     goal=GoalsSerializer(read_only=True) #many=True removed because it's a ForeignKey relationship and is only usedin many-to-many or one-to-many relationships
-    user=serializers.ReadOnlyField(source='user.username')
+    owner=serializers.ReadOnlyField(source='owner.username')
 
     class Meta:
         model=ProgressTrackers

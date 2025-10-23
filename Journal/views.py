@@ -2,13 +2,14 @@ from django.shortcuts import render
 from rest_framework import viewsets, permissions, generics
 from .serializers import GoalsSerializer, JournalEntriesSerializer, ProgressTrackersSerializer
 from .models import Goals, JournalEntries, ProgressTrackers
-from .permissions import IsAuthenticatedorReadOnly
+from rest_framework import permissions
 from django.contrib.auth.models import User
+from Journal.permissions import isOwnerorReadonly
 
 class BaseUserViewset(viewsets.ModelViewSet):
-    permission_classes=[permissions.IsAuthenticatedOrReadOnly]
+    permission_classes=[permissions.IsAuthenticatedOrReadOnly, isOwnerorReadonly]
     def perform_create(self, serializer):#this line of function ensures that the user field is automatically set to the currently authenticated user when a new goal is created.
-        return serializer.save(user=self.request.user)
+        serializer.save(owner=self.request.user)
 
    #this line of function filters the queryset to only include goals that belong to the currently authenticated user. 
     def get_queryset(self):
