@@ -1,26 +1,38 @@
 #from django.shortcuts import render
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
-from django.conf import settings
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
 from rest_framework import viewsets, permissions, generics
-from .serializers import GoalsSerializer, JournalEntriesSerializer, ProgressTrackersSerializer
+from .serializers import GoalsSerializer, JournalEntriesSerializer, ProgressTrackersSerializer, UserSerializer
 from .models import Goals, JournalEntries, ProgressTrackers
 from django.contrib.auth.models import User
 from Journal.permissions import isOwnerorReadonly
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
 
+class registerUserView(generics.CreateAPIView):
+    queryset=User.objects.all()
+    serializer_class=UserSerializer
+    permission_classes=[permissions.AllowAny]
+
+    def perform_create(self, serializer):
+        user=serializer.save()
+        token, _ = TokenAuthentication.objects.get_or_create(user=user)
+        self.Token=token
+
+    def create(self, request, *args, **kwargs):
+        response=super().create(request, *args, **kwargs)
+        response.data['token']=self.Token.key
+        return response
+            
 class BaseUserViewset(viewsets.ModelViewSet):
-    permission_classes=[permissions.IsAuthenticatedOrReadOnly, isOwnerorReadonly]
-    def perform_create(self, serializer):#this line of function ensures that the user field is automatically set to the currently authenticated user when a new goal is created.
+    authentication_classes=[TokenAuthentication]
+    permission_classes=[permissions.IsAuthenticated, isOwnerorReadonly]
+
+    #this line of function ensures that the user field is automatically 
+    # set to the currently authenticated user when a new goal is created.
+    def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-   #this line of function filters the queryset to only include goals that belong to the currently authenticated user. 
+    #this line of function filters the queryset to only include goals 
+    # that belong to the currently authenticated user. 
     def get_queryset(self):
         user = self.request.user
         if user.is_authenticated:

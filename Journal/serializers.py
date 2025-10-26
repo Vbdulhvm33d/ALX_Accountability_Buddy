@@ -7,6 +7,13 @@ from django.contrib.auth.models import User
 #Also, we can use the serializers to define nested relationships between models if needed
 #and we can use the serializers to define custom fields and methods for our models
 
+class UserSerializer(serializers.ModelSerializer):
+    password=serializers.CharField(write_only=True)
+    class Meta:
+        model=User
+        fields=['id', 'username', 'email', 'password']
+
+
 class GoalsSerializer(serializers.ModelSerializer):
     owner=serializers.ReadOnlyField(source='owner.username')
 
